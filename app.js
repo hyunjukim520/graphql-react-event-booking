@@ -12,6 +12,37 @@ const app = express();
 const uid = "5cfe5dafa4070a3db088f9a1";
 
 app.use(bodyParser.json());
+
+const events = eventIds => {
+  return Event.find({ _id: { $in: eventIds } })
+    .then(events => {
+      return events.map(event => {
+        return {
+          ...event._doc,
+          _id: event.id,
+          creator: user.bind(this, event.creator)
+        };
+      });
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
+const user = userId => {
+  return User.findById(userId)
+    .then(user => {
+      return {
+        ...user._doc,
+        _id: user.id,
+        createdEvents: events.bind(this, user._doc.createdEvents)
+      };
+    })
+    .catch(err => {
+      throw err;
+    });
+};
+
 // query: fetching data: select
 // mutation: changing data create,update,delete
 app.use(
@@ -24,12 +55,14 @@ app.use(
         description: String!
         price: Float!
         date: String!
+        creator: User!
       }
 
       type User {
         _id: ID!
         email: String!
         password: String
+        createdEvents: [Event!]
       }
 
       input EventInput {
@@ -61,9 +94,14 @@ app.use(
     rootValue: {
       events: () => {
         return Event.find()
+          .populate("creator")
           .then(events => {
             return events.map(event => {
-              return { ...event._doc, _id: event.id }; //event.id <= event._doc._id.toString()
+              return {
+                ...event._doc,
+                _id: event.id,
+                creator: user.bind(this, event._doc.creator)
+              }; //event.id <= event._doc._id.toString()
             });
           })
           .catch(err => {
@@ -85,7 +123,11 @@ app.use(
           .save()
           .then(result => {
             // console.log(result);
-            createdEvent = { ...result._doc, _id: result.id }; //_id <= result._doc._id.toString()
+            createdEvent = {
+              ...result._doc,
+              _id: result.id,
+              creator: user.bind(this, result._doc.creator)
+            }; //_id <= result._doc._id.toString()
             return User.findById(uid);
           })
           .then(user => {
