@@ -6,13 +6,16 @@ Build a Complete App with GraphQL, Node.js, MongoDB and React.js
 
 https://github.com/academind/yt-graphql-react-event-booking-api/tree/01-basic-setup
 
-#Github
+# Github
+
 https://github.com/academind/yt-graphql-react-event-booking-api/tree/01-basic-setup
 
-#local
+# local
+
 C:\Study\React\mern\graphql-react-event-booking
 
-#…or create a new repository on the command line
+# …or create a new repository on the command line
+
 echo "# graphql-react-event-booking" >> README.md
 git init
 git add README.md
