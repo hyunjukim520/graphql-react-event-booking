@@ -2,10 +2,15 @@
 # Created by https://www.gitignore.io/api/node,windows,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=node,windows,visualstudiocode
 
-### Node ###
 # *.lock
 package-lock.json
 yarn.lock
+
+# env
+nodemon.json
+
+### Node ###
+
 # Logs
 logs
 *.log
