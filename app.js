@@ -7,7 +7,6 @@ const graphQlSchema = require("./graphql/schema");
 const graphQlResolvers = require("./graphql/resolvers");
 
 const app = express();
-const uid = "5cfe5dafa4070a3db088f9a1";
 
 app.use(bodyParser.json());
 
