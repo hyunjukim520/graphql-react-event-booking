@@ -57,11 +57,8 @@ const user = async userId => {
   }
 };
 
-const uid = "5cfe5dafa4070a3db088f9a1";
-
 // exports.user = user;
 // exports.events = events;
 // exports.singleEvent = singleEvent;
 exports.transformEvent = transformEvent;
 exports.transformBooking = transformBooking;
-exports.uid = uid;
