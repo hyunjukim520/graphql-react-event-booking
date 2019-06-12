@@ -9,8 +9,6 @@ import AuthContext from "../context/auth-context";
 import "./Events.css";
 
 class EventsPage extends Component {
-  static contextType = AuthContext;
-
   constructor(props) {
     super(props);
     this.titleElRef = React.createRef();
@@ -19,16 +17,16 @@ class EventsPage extends Component {
     this.descriptionElRef = React.createRef();
   }
 
-  componentDidMount() {
-    this.fetchEvents();
-  }
-
   state = {
     createing: false,
     events: [],
     isLoading: false,
     selectedEvent: null
   };
+
+  isActive = true;
+
+  static contextType = AuthContext;
 
   startCreateEventHandler = () => {
     this.setState({ createing: true });
@@ -66,14 +64,12 @@ class EventsPage extends Component {
         }`
     };
 
-    const token = this.context.token;
-
     fetch("http://localhost:8000/graphql", {
       method: "POST",
       body: JSON.stringify(requestBody),
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${this.context.token}`
       }
     })
       .then(res => {
@@ -143,12 +139,17 @@ class EventsPage extends Component {
       })
       .then(resData => {
         // console.log(resData);
-        const events = resData.data.events;
-        this.setState({ events, isLoading: false });
+
+        if (this.isActive) {
+          const events = resData.data.events;
+          this.setState({ events, isLoading: false });
+        }
       })
       .catch(err => {
         console.log(err);
-        this.setState({ isLoading: false });
+        if (this.isActive) {
+          this.setState({ isLoading: false });
+        }
       });
   };
 
@@ -159,7 +160,55 @@ class EventsPage extends Component {
     });
   };
 
-  bookEventHandler = () => {};
+  bookEventHandler = () => {
+    if (!this.context.token) {
+      this.setState({ selectedEvent: null });
+      return;
+    }
+    this.setState({ isLoading: true });
+
+    const requestBody = {
+      query: `
+        mutation {
+          bookEvent(eventId:"${this.state.selectedEvent._id}") {
+            _id
+            createdAt
+            updatedAt
+        }
+      }`
+    };
+
+    fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.context.token}`
+      }
+    })
+      .then(res => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed");
+        }
+        return res.json();
+      })
+      .then(resData => {
+        console.log(resData);
+        this.setState({ isLoading: false, selectedEvent: null });
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({ isLoading: false });
+      });
+  };
+
+  componentDidMount() {
+    this.fetchEvents();
+  }
+
+  componentWillUnmount() {
+    this.isActive = false;
+  }
 
   render() {
     return (
@@ -205,7 +254,7 @@ class EventsPage extends Component {
             canConfirm
             onCancel={this.modalCancelHandler}
             onConfirm={this.bookEventHandler}
-            confirmText="Book"
+            confirmText={this.context.token ? "Book" : "Confirm"}
           >
             <h1>{this.state.selectedEvent.title}</h1>
             <h2>
